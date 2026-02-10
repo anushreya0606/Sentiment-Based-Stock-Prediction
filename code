@@ -1,0 +1,87 @@
+import csv
+from statistics import mean
+
+
+POSITIVE_WORDS = {
+"profit": 2, "growth": 2, "rise": 1, "gain": 1, "strong": 2, "up": 1
+}
+
+
+NEGATIVE_WORDS = {
+"loss": -2, "fall": -1, "drop": -1, "weak": -2, "down": -1, "decline": -2
+}
+
+
+
+
+def calculate_sentiment(text: str) -> int:
+score = 0
+text = text.lower()
+
+
+for word, value in POSITIVE_WORDS.items():
+if word in text:
+score += value
+for word, value in NEGATIVE_WORDS.items():
+if word in text:
+score += value
+
+
+return score
+
+
+
+
+def moving_average(prices, window=3):
+"""Return last moving average value."""
+if len(prices) < window:
+return mean(prices)
+return mean(prices[-window:])
+
+
+
+
+def predict(sentiment_score, prices):
+trend = prices[-1] - moving_average(prices)
+if sentiment_score > 3 and trend > 0:
+return "BUY"
+elif sentiment_score < -3 and trend < 0:
+return "SELL"
+return "HOLD"
+
+
+
+
+def read_news_csv(path):
+total = 0
+with open(path, newline='', encoding='utf-8') as f:
+reader = csv.reader(f)
+for row in reader:
+if row:
+total += calculate_sentiment(row[0])
+return total
+
+
+
+
+def main():
+print("=== Advanced Sentiment Stock Predictor ===")
+
+
+news_file = input("Enter news CSV file path: ")
+sentiment_score = read_news_csv(news_file)
+
+
+n = int(input("Enter number of recent prices: "))
+prices = [float(input(f"Price {i+1}: ")) for i in range(n)]
+
+
+decision = predict(sentiment_score, prices)
+
+
+print("
+Sentiment Score:", sentiment_score)
+print("Latest Moving Average:", moving_average(prices))
+print("Final Prediction:", decision)
+if __name__ == "__main__":
+main()
